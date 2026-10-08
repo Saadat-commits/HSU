@@ -36,6 +36,7 @@ function Navigator() {
         contentStyle: { backgroundColor: colors.surface },
       }}
     >
+      <Stack.Screen name="mitarbeiter" />
       <Stack.Protected guard={!user}>
         <Stack.Screen name="sign-in" />
       </Stack.Protected>
@@ -63,7 +64,7 @@ export default function RootLayout() {
           <KeyboardProvider>
             <I18nProvider>
               <AuthProvider>
-                <StatusBar style="auto" />
+                <StatusBar style="light" />
                 <Navigator />
               </AuthProvider>
             </I18nProvider>
