@@ -6,6 +6,7 @@ import { LogBox, View } from "react-native";
 import { KeyboardProvider } from "react-native-keyboard-controller";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
+import { useStoredScheme } from "@/src/appearance";
 import { AuthProvider, useAuth } from "@/src/auth";
 import { ErrorBoundary } from "@/src/components/error-boundary";
 import { LoadingView } from "@/src/components/ui";
@@ -43,6 +44,9 @@ function Navigator() {
         <Stack.Screen name="grades" />
         <Stack.Screen name="mensa" />
         <Stack.Screen name="news" />
+        <Stack.Screen name="exams" />
+        <Stack.Screen name="flashcards" />
+        <Stack.Screen name="decks/[deckId]" />
         <Stack.Screen name="settings" />
       </Stack.Protected>
     </Stack>
@@ -50,6 +54,8 @@ function Navigator() {
 }
 
 export default function RootLayout() {
+  useStoredScheme();
+
   return (
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>

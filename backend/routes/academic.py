@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 from typing import Optional
 
 from fastapi import APIRouter, HTTPException
@@ -26,6 +26,14 @@ class GradeBody(BaseModel):
     course: str = Field(min_length=1, max_length=120)
     ects: int = Field(ge=0, le=60)
     grade: float = Field(ge=1.0, le=5.0)
+
+
+class ExamBody(BaseModel):
+    title: str = Field(min_length=1, max_length=120)
+    course: Optional[str] = Field(default=None, max_length=120)
+    location: Optional[str] = Field(default=None, max_length=120)
+    date: str = Field(pattern=r"^\d{4}-\d{2}-\d{2}$")
+    start_time: str = Field(default="09:00", pattern=r"^\d{2}:\d{2}$")
 
 
 @router.get("/schedule")
@@ -97,4 +105,40 @@ async def delete_grade(grade_id: str, user: CurrentUser):
     )
     if result.deleted_count == 0:
         raise HTTPException(404, "Note nicht gefunden.")
+    return {"deleted": True}
+
+
+@router.get("/exams")
+async def list_exams(user: CurrentUser, upcoming_only: bool = True):
+    query: dict = {"user_id": user["user_id"]}
+    if upcoming_only:
+        query["date"] = {"$gte": date.today().isoformat()}
+    exams = (
+        await db.exams.find(query, {"_id": 0})
+        .sort([("date", 1), ("start_time", 1)])
+        .to_list(200)
+    )
+    return exams
+
+
+@router.post("/exams", status_code=201)
+async def create_exam(body: ExamBody, user: CurrentUser):
+    exam = {
+        "exam_id": str(uuid.uuid4()),
+        "user_id": user["user_id"],
+        "created_at": datetime.now(timezone.utc),
+        **body.model_dump(),
+    }
+    await db.exams.insert_one(exam)
+    exam.pop("_id", None)
+    return exam
+
+
+@router.delete("/exams/{exam_id}")
+async def delete_exam(exam_id: str, user: CurrentUser):
+    result = await db.exams.delete_one(
+        {"exam_id": exam_id, "user_id": user["user_id"]}
+    )
+    if result.deleted_count == 0:
+        raise HTTPException(404, "Prüfung nicht gefunden.")
     return {"deleted": True}

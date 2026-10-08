@@ -228,6 +228,31 @@ DEMO_GRADES = [
 ]
 
 
+DEMO_EXAMS = [
+    {
+        "title": "Klausur Höhere Mathematik II",
+        "course": "Höhere Mathematik II",
+        "location": "H1, Holstenhofweg",
+        "offset_days": 9,
+        "start_time": "09:00",
+    },
+    {
+        "title": "Klausur Technische Informatik",
+        "course": "Technische Informatik",
+        "location": "H3, Douaumont",
+        "offset_days": 18,
+        "start_time": "13:00",
+    },
+    {
+        "title": "Mündliche Prüfung Führung & Organisation",
+        "course": "Führung und Organisation",
+        "location": "Raum 2.14",
+        "offset_days": 31,
+        "start_time": "10:30",
+    },
+]
+
+
 async def seed_campus_data() -> None:
     """Mensa-Pläne für zwei Wochen und Campus-News anlegen (idempotent)."""
     today = date.today()
@@ -288,5 +313,22 @@ async def seed_user_data(user_id: str) -> None:
                     **grade,
                 }
                 for grade in DEMO_GRADES
+            ]
+        )
+    if await db.exams.count_documents({"user_id": user_id}) == 0:
+        today = date.today()
+        await db.exams.insert_many(
+            [
+                {
+                    "exam_id": str(uuid.uuid4()),
+                    "user_id": user_id,
+                    "created_at": now,
+                    "title": exam["title"],
+                    "course": exam["course"],
+                    "location": exam["location"],
+                    "start_time": exam["start_time"],
+                    "date": (today + timedelta(days=exam["offset_days"])).isoformat(),
+                }
+                for exam in DEMO_EXAMS
             ]
         )

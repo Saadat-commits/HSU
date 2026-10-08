@@ -30,7 +30,7 @@
 // Nothing else changes; the device setting takes over automatically.
 // Feel free to add as many new colors as you need to support the design guidelines.
 
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Appearance, StyleSheet, useColorScheme } from "react-native";
 
 export type ColorScheme = "light" | "dark";
@@ -160,12 +160,41 @@ export function setColorScheme(scheme: ColorScheme | null) {
 // Optional call because react-native-web does not implement it.
 setColorScheme?.(themes.dark ? null : defaultScheme);
 
+// User preference: null = follow the device. Kept module-level with manual
+// subscribers so the override also works on react-native-web, where
+// Appearance.setColorScheme is a no-op.
+export type SchemePreference = ColorScheme | null;
+
+let preferredScheme: SchemePreference = null;
+const preferenceListeners = new Set<() => void>();
+
+export function getPreferredScheme(): SchemePreference {
+  return preferredScheme;
+}
+
+export function setPreferredScheme(scheme: SchemePreference) {
+  preferredScheme = scheme;
+  setColorScheme?.(scheme);
+  preferenceListeners.forEach((listener) => listener());
+}
+
 export function useTheme(): { scheme: ColorScheme; colors: ThemeColors } {
   const system = useColorScheme();
-  const scheme: ColorScheme =
+  const [, bump] = useState(0);
+
+  useEffect(() => {
+    const listener = () => bump((value) => value + 1);
+    preferenceListeners.add(listener);
+    return () => {
+      preferenceListeners.delete(listener);
+    };
+  }, []);
+
+  const device: ColorScheme =
     system === "dark" || system === "light"
       ? ((themes[system] ? system : defaultScheme) as ColorScheme)
       : defaultScheme;
+  const scheme = preferredScheme ?? device;
   return { scheme, colors: themes[scheme] ?? themes.light };
 }
 

@@ -13,9 +13,16 @@ import {
   Pill,
   SectionTitle,
 } from "@/src/components/ui";
-import { campusApi, GradesResponse, ScheduleEntry } from "@/src/api";
+import {
+  campusApi,
+  Exam,
+  FavoriteMatch,
+  GradesResponse,
+  ScheduleEntry,
+} from "@/src/api";
 import { useI18n } from "@/src/i18n";
 import { makeStyles, radius, spacing, useTheme } from "@/src/theme";
+import { daysUntil, formatDay } from "@/src/utils/countdown";
 
 type IconName = React.ComponentProps<typeof Ionicons>["name"];
 
@@ -82,6 +89,46 @@ const useStyles = makeStyles((colors) => ({
   classTitle: { fontSize: 15, fontWeight: "700", color: colors.onSurface },
   classMeta: { fontSize: 13, color: colors.muted, marginTop: 2 },
   divider: { height: 1, backgroundColor: colors.divider, marginVertical: spacing.md },
+  examRow: { flexDirection: "row", alignItems: "center", gap: spacing.md },
+  countdown: {
+    minWidth: 58,
+    paddingVertical: spacing.sm,
+    borderRadius: radius.md,
+    backgroundColor: colors.brandTertiary,
+    alignItems: "center",
+  },
+  countdownUrgent: { backgroundColor: colors.brandPrimary },
+  countdownValue: {
+    fontSize: 18,
+    fontWeight: "800",
+    color: colors.onBrandTertiary,
+  },
+  countdownValueUrgent: { color: colors.onBrandPrimary },
+  countdownUnit: {
+    fontSize: 10,
+    fontWeight: "700",
+    color: colors.onBrandTertiary,
+  },
+  countdownUnitUrgent: { color: colors.onBrandPrimary },
+  favoriteCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.md,
+    backgroundColor: colors.brandTertiary,
+    borderRadius: radius.md,
+    padding: spacing.lg,
+  },
+  favoriteLabel: {
+    fontSize: 12,
+    fontWeight: "700",
+    color: colors.onBrandTertiary,
+  },
+  favoriteName: {
+    fontSize: 15,
+    fontWeight: "700",
+    color: colors.onBrandTertiary,
+    marginTop: 2,
+  },
 }));
 
 function greetingKey() {
@@ -96,7 +143,7 @@ export default function Home() {
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
   const { user } = useAuth();
 
   const schedule = useQuery<ScheduleEntry[]>({
@@ -107,6 +154,14 @@ export default function Home() {
     queryKey: ["grades"],
     queryFn: campusApi.grades,
   });
+  const exams = useQuery<Exam[]>({
+    queryKey: ["exams"],
+    queryFn: campusApi.exams,
+  });
+  const favorites = useQuery<{ favorites: string[]; upcoming: FavoriteMatch[] }>({
+    queryKey: ["mensa-favorites"],
+    queryFn: campusApi.favorites,
+  });
 
   const weekday = (new Date().getDay() + 6) % 7;
   const todayClasses = (schedule.data ?? []).filter(
@@ -115,12 +170,27 @@ export default function Home() {
 
   const quickLinks: { label: string; icon: IconName; href: string; testID: string }[] = [
     { label: t("grades"), icon: "ribbon-outline", href: "/grades", testID: "quick-grades" },
+    { label: t("exams"), icon: "school-outline", href: "/exams", testID: "quick-exams" },
+    { label: t("flashcards"), icon: "albums-outline", href: "/flashcards", testID: "quick-flashcards" },
     { label: t("mensa"), icon: "restaurant-outline", href: "/mensa", testID: "quick-mensa" },
     { label: t("news"), icon: "newspaper-outline", href: "/news", testID: "quick-news" },
     { label: t("settings"), icon: "settings-outline", href: "/settings", testID: "quick-settings" },
   ];
 
-  const refreshing = schedule.isFetching || grades.isFetching;
+  const nextExams = (exams.data ?? []).slice(0, 3);
+  const todayIso = (() => {
+    const now = new Date();
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(
+      now.getDate(),
+    ).padStart(2, "0")}`;
+  })();
+  const favoriteMatch = (favorites.data?.upcoming ?? [])[0];
+
+  const refreshing =
+    schedule.isFetching ||
+    grades.isFetching ||
+    exams.isFetching ||
+    favorites.isFetching;
 
   return (
     <ScrollView
@@ -135,6 +205,8 @@ export default function Home() {
           onRefresh={() => {
             schedule.refetch();
             grades.refetch();
+            exams.refetch();
+            favorites.refetch();
           }}
           tintColor={colors.brandPrimary}
         />
@@ -161,6 +233,85 @@ export default function Home() {
           <Text style={styles.statLabel}>{t("ects")}</Text>
         </Card>
       </View>
+
+      {nextExams.length > 0 ? (
+        <View>
+          <SectionTitle>{t("upcomingExams")}</SectionTitle>
+          <TouchableOpacity
+            testID="home-exams-card"
+            activeOpacity={0.9}
+            onPress={() => router.push("/exams")}
+          >
+            <Card>
+              {nextExams.map((exam, index) => {
+                const days = daysUntil(exam.date);
+                const urgent = days <= 7;
+                return (
+                  <View key={exam.exam_id}>
+                    {index > 0 ? <View style={styles.divider} /> : null}
+                    <View style={styles.examRow}>
+                      <View
+                        style={[
+                          styles.countdown,
+                          urgent && styles.countdownUrgent,
+                        ]}
+                      >
+                        <Text
+                          style={[
+                            styles.countdownValue,
+                            urgent && styles.countdownValueUrgent,
+                          ]}
+                        >
+                          {days <= 0 ? "0" : days}
+                        </Text>
+                        <Text
+                          style={[
+                            styles.countdownUnit,
+                            urgent && styles.countdownUnitUrgent,
+                          ]}
+                        >
+                          {days === 1 ? t("dayLeft") : t("daysLeft")}
+                        </Text>
+                      </View>
+                      <View style={{ flex: 1 }}>
+                        <Text style={styles.classTitle}>{exam.title}</Text>
+                        <Text style={styles.classMeta}>
+                          {formatDay(exam.date, lang)} · {exam.start_time}
+                          {exam.location ? ` · ${exam.location}` : ""}
+                        </Text>
+                      </View>
+                    </View>
+                  </View>
+                );
+              })}
+            </Card>
+          </TouchableOpacity>
+        </View>
+      ) : null}
+
+      {favoriteMatch ? (
+        <TouchableOpacity
+          testID="home-favorite-card"
+          activeOpacity={0.9}
+          style={styles.favoriteCard}
+          onPress={() => router.push("/mensa")}
+        >
+          <Ionicons name="heart" size={22} color={colors.brandPrimary} />
+          <View style={{ flex: 1 }}>
+            <Text style={styles.favoriteLabel}>
+              {favoriteMatch.date === todayIso
+                ? t("favoriteToday")
+                : `${t("favoriteSoon")} ${formatDay(favoriteMatch.date, lang)}`}
+            </Text>
+            <Text style={styles.favoriteName}>{favoriteMatch.name}</Text>
+          </View>
+          <Ionicons
+            name="chevron-forward"
+            size={18}
+            color={colors.brandPrimary}
+          />
+        </TouchableOpacity>
+      ) : null}
 
       <View>
         <SectionTitle>{t("quickLinks")}</SectionTitle>

@@ -96,6 +96,41 @@ export type Meal = {
   price_student: number;
   price_staff: number;
   tags: string[];
+  is_favorite: boolean;
+};
+
+export type FavoriteMatch = {
+  name: string;
+  date: string;
+  category: string;
+  price_student: number;
+};
+
+export type Exam = {
+  exam_id: string;
+  title: string;
+  course?: string | null;
+  location?: string | null;
+  date: string;
+  start_time: string;
+};
+
+export type Deck = {
+  deck_id: string;
+  title: string;
+  topic: string;
+  created_at: string;
+  card_count: number;
+  known_count: number;
+};
+
+export type Flashcard = {
+  card_id: string;
+  deck_id: string;
+  question: string;
+  answer: string;
+  known: boolean;
+  position: number;
 };
 
 export type NewsItem = {
@@ -152,7 +187,39 @@ export const campusApi = {
     api<{ deleted: boolean }>(`/api/grades/${gradeId}`, { method: "DELETE" }),
   mensa: (day: string) =>
     api<{ date: string; meals: Meal[] }>(`/api/mensa?day=${day}`),
+  favorites: () =>
+    api<{ favorites: string[]; upcoming: FavoriteMatch[] }>(
+      "/api/mensa/favorites",
+    ),
+  toggleFavorite: (name: string) =>
+    api<{ name: string; is_favorite: boolean }>("/api/mensa/favorites", {
+      method: "POST",
+      body: JSON.stringify({ name }),
+    }),
   news: () => api<NewsItem[]>("/api/news"),
+  exams: () => api<Exam[]>("/api/exams"),
+  createExam: (body: Omit<Exam, "exam_id">) =>
+    api<Exam>("/api/exams", { method: "POST", body: JSON.stringify(body) }),
+  deleteExam: (examId: string) =>
+    api<{ deleted: boolean }>(`/api/exams/${examId}`, { method: "DELETE" }),
+};
+
+export const deckApi = {
+  list: () => api<Deck[]>("/api/decks"),
+  get: (deckId: string) =>
+    api<{ deck: Deck; cards: Flashcard[] }>(`/api/decks/${deckId}`),
+  generate: (topic: string, count: number) =>
+    api<Deck>("/api/flashcards/generate", {
+      method: "POST",
+      body: JSON.stringify({ topic, count }),
+    }),
+  setCardState: (deckId: string, cardId: string, known: boolean) =>
+    api<{ card_id: string; known: boolean }>(
+      `/api/decks/${deckId}/cards/${cardId}`,
+      { method: "PATCH", body: JSON.stringify({ known }) },
+    ),
+  remove: (deckId: string) =>
+    api<{ deleted: boolean }>(`/api/decks/${deckId}`, { method: "DELETE" }),
 };
 
 export const aiApi = {

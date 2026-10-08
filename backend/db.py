@@ -23,3 +23,7 @@ async def ensure_indexes() -> None:
     await db.ai_messages.create_index([("user_id", 1), ("created_at", 1)])
     await db.mensa.create_index([("date", 1)])
     await db.news.create_index([("published_at", -1)])
+    await db.exams.create_index([("user_id", 1), ("date", 1)])
+    await db.mensa_favorites.create_index([("user_id", 1), ("name", 1)], unique=True)
+    await db.flashcard_decks.create_index([("user_id", 1), ("created_at", -1)])
+    await db.flashcards.create_index([("deck_id", 1), ("position", 1)])

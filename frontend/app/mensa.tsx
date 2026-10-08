@@ -1,6 +1,14 @@
-import { useQuery } from "@tanstack/react-query";
+import Ionicons from "@react-native-vector-icons/ionicons";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import * as Haptics from "expo-haptics";
 import React, { useState } from "react";
-import { Pressable, ScrollView, Text, View } from "react-native";
+import {
+  Pressable,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { campusApi, Meal } from "@/src/api";
@@ -13,7 +21,7 @@ import {
   ScreenHeader,
 } from "@/src/components/ui";
 import { useI18n, WEEKDAYS } from "@/src/i18n";
-import { makeStyles, radius, spacing } from "@/src/theme";
+import { makeStyles, radius, spacing, useTheme } from "@/src/theme";
 
 function weekDates(): Date[] {
   const today = new Date();
@@ -74,12 +82,25 @@ const useStyles = makeStyles((colors) => ({
   },
   priceText: { fontSize: 12, fontWeight: "700", color: colors.onSurfaceTertiary },
   tagRow: { flexDirection: "row", gap: spacing.sm, marginTop: spacing.sm },
+  favoriteCard: {
+    borderColor: colors.brandPrimary,
+    borderWidth: 2,
+    backgroundColor: colors.brandTertiary,
+  },
+  favoriteButton: {
+    width: 44,
+    height: 44,
+    alignItems: "center",
+    justifyContent: "center",
+  },
 }));
 
 export default function Mensa() {
   const styles = useStyles();
   const insets = useSafeAreaInsets();
+  const { colors } = useTheme();
   const { t, lang } = useI18n();
+  const queryClient = useQueryClient();
   const dates = weekDates();
   const [selected, setSelected] = useState(
     Math.min((new Date().getDay() + 6) % 7, 4),
@@ -89,6 +110,14 @@ export default function Mensa() {
   const menu = useQuery<{ date: string; meals: Meal[] }>({
     queryKey: ["mensa", day],
     queryFn: () => campusApi.mensa(day),
+  });
+
+  const toggleFavorite = useMutation({
+    mutationFn: (name: string) => campusApi.toggleFavorite(name),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["mensa"] });
+      queryClient.invalidateQueries({ queryKey: ["mensa-favorites"] });
+    },
   });
 
   return (
@@ -140,9 +169,30 @@ export default function Mensa() {
             </Card>
           ) : (
             (menu.data?.meals ?? []).map((meal) => (
-              <Card key={meal.menu_id}>
+              <Card
+                key={meal.menu_id}
+                style={meal.is_favorite ? styles.favoriteCard : undefined}
+              >
                 <View style={styles.mealHeader}>
-                  <Pill>{meal.category}</Pill>
+                  <Pill>
+                    {meal.is_favorite
+                      ? `${meal.category} · ${t("favoriteBadge")}`
+                      : meal.category}
+                  </Pill>
+                  <TouchableOpacity
+                    testID={`mensa-favorite-${meal.menu_id}`}
+                    style={styles.favoriteButton}
+                    onPress={() => {
+                      Haptics.selectionAsync().catch(() => {});
+                      toggleFavorite.mutate(meal.name);
+                    }}
+                  >
+                    <Ionicons
+                      name={meal.is_favorite ? "heart" : "heart-outline"}
+                      size={22}
+                      color={colors.brandPrimary}
+                    />
+                  </TouchableOpacity>
                 </View>
                 <Text style={styles.mealName}>{meal.name}</Text>
                 <View style={styles.tagRow}>

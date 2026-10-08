@@ -114,6 +114,18 @@ export default function Profile() {
               onPress={() => router.push("/grades")}
             />
             <ListRow
+              testID="profile-exams-row"
+              icon="school-outline"
+              label={t("exams")}
+              onPress={() => router.push("/exams")}
+            />
+            <ListRow
+              testID="profile-flashcards-row"
+              icon="albums-outline"
+              label={t("flashcards")}
+              onPress={() => router.push("/flashcards")}
+            />
+            <ListRow
               testID="profile-news-row"
               icon="newspaper-outline"
               label={t("news")}
