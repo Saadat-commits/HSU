@@ -1,0 +1,206 @@
+{
+  "app_name": "HSU Student Portal",
+  "personality": "1 iOS-Native Clean",
+  "personality_one_liner": "A highly functional, disciplined, and modern student portal featuring deep crimson accents and structured layouts to reflect a prestigious military university.",
+  "color": {
+    "surface": "#F2F2F7",
+    "onSurface": "#1C1C1E",
+    "surfaceSecondary": "#FFFFFF",
+    "onSurfaceSecondary": "#1C1C1E",
+    "surfaceTertiary": "#E5E5EA",
+    "onSurfaceTertiary": "#3A3A3C",
+    "surfaceInverse": "#1C1C1E",
+    "onSurfaceInverse": "#FFFFFF",
+    "brand": "#9D1B22",
+    "onBrand": "#FFFFFF",
+    "brandPrimary": "#9D1B22",
+    "onBrandPrimary": "#FFFFFF",
+    "brandSecondary": "#D88B92",
+    "onBrandSecondary": "#4A0D10",
+    "brandTertiary": "#F2D8DB",
+    "onBrandTertiary": "#9D1B22",
+    "success": "#34C759",
+    "onSuccess": "#FFFFFF",
+    "warning": "#FFCC00",
+    "onWarning": "#1C1C1E",
+    "error": "#FF3B30",
+    "onError": "#FFFFFF",
+    "info": "#007AFF",
+    "onInfo": "#FFFFFF",
+    "border": "#E5E5EA",
+    "borderStrong": "#C7C7CC",
+    "divider": "#E5E5EA",
+    "muted": "#8E8E93"
+  },
+  "typography": {
+    "displayFontFamily": "Plus Jakarta Sans",
+    "textFontFamily": "Plus Jakarta Sans",
+    "scale": {
+      "sm": 12,
+      "base": 14,
+      "lg": 16,
+      "xl": 20,
+      "2xl": 24
+    }
+  },
+  "spacing": {
+    "rule": "Use generous vertical spacing (lg/xl) to separate sections, and tighter grouping (sm/md) within cards to maintain a structured rhythm.",
+    "xs": 4,
+    "sm": 8,
+    "md": 12,
+    "lg": 16,
+    "xl": 24,
+    "2xl": 32,
+    "3xl": 48
+  },
+  "radius_tokens": {
+    "sm": 6,
+    "md": 12,
+    "lg": 20,
+    "pill": 999
+  },
+  "shadow_tier": 1,
+  "navigation": "bottom_tabs",
+  "icon_set": "Ionicons",
+  "glassmorphism": {
+    "enabled": true,
+    "do's": [
+      "Bottom tab bar",
+      "Sticky headers (like the date picker in Schedule or top navigation)",
+      "Floating action buttons or contextual action pills"
+    ],
+    "dont's": [
+      "Form fields",
+      "Everyday list rows",
+      "Data-dense areas like Grades overview"
+    ]
+  },
+  "platform_libraries": {
+    "glass": {
+      "ios": "expo-glass-effect",
+      "android": "expo-blur",
+      "low_end_android_fallback": "solid surfaceSecondary"
+    },
+    "image": "expo-image",
+    "blur": "expo-blur",
+    "bottom_sheet": "@gorhom/bottom-sheet",
+    "animation": "react-native-reanimated",
+    "gesture": "react-native-gesture-handler"
+  },
+  "screens": [
+    {
+      "name": "Auth (Login/Register)",
+      "purpose": "Secure gateway to the student portal featuring the university identity.",
+      "states": {
+        "loading": "Centered brand-colored spinner.",
+        "empty": "N/A",
+        "error": "Inline text or toast above the login button with 'Retry' capability."
+      },
+      "layout": "Full-bleed hero image of a campus building ('login_hero') with a vertical gradient scrim (transparent to surfaceInverse at 70%). Bottom half contains a clean, single-column form on the glass or surface layer. Email, password fields, and a sticky primary CTA ('Login'/'Register')."
+    },
+    {
+      "name": "Home (Dashboard)",
+      "purpose": "A personalized hub providing immediate context on today's classes and easy access to key services.",
+      "states": {
+        "loading": "Skeleton loaders for the quick action cards and today's schedule.",
+        "empty": "No classes today: show a relaxing empty-state illustration.",
+        "error": "Failed to load dashboard data: generic error state with a prominent 'Retry' button."
+      },
+      "layout": "Top greeting ('Good morning, Cadet'). A horizontal scroll or grid of Quick Links (Grades, Mensa, News, Webmail) using tinted icon containers. Below that, a list of 'Today's Classes' displaying time, location, and professor, leveraging subtle shadows for elevation."
+    },
+    {
+      "name": "Schedule (Stundenplan)",
+      "purpose": "Daily and weekly academic timetable view.",
+      "states": {
+        "loading": "Skeleton blocks representing class slots.",
+        "empty": "No events on selected date: 'No classes scheduled' with a checkmark illustration.",
+        "error": "Failed to fetch schedule: 'Unable to load schedule' and 'Retry'."
+      },
+      "layout": "Sticky top date-picker or day-switcher with a glass background. Below, a vertical timeline or stacked cards of classes. Each card highlights the course type (Vorlesung/Seminar) using a 'brandTertiary' pill."
+    },
+    {
+      "name": "Grades (Noten)",
+      "purpose": "Comprehensive academic performance tracking.",
+      "states": {
+        "loading": "Spinner centered on the screen.",
+        "empty": "No grades recorded yet.",
+        "error": "Error fetching transcripts."
+      },
+      "layout": "Overview header with current GPA and total ECTS credits. A list of semesters, which act as accordions or tap-through rows leading to specific course grades. Focus on clear typography and functional table-like row alignment."
+    },
+    {
+      "name": "Mensa (Cafeteria Menu)",
+      "purpose": "Daily food offerings, pricing, and allergen information.",
+      "states": {
+        "loading": "Skeleton layout for menu items.",
+        "empty": "Mensa is closed today.",
+        "error": "Could not fetch today's menu."
+      },
+      "layout": "Segmented control at the top for days of the week. Vertical list of cards for each meal (e.g., 'Dish 1', 'Vegan', 'Grill'). Each card shows the meal name, price pills for Student/Staff, and dietary icons."
+    },
+    {
+      "name": "News (Campus-Nachrichten)",
+      "purpose": "Updates from the university administration and campus life.",
+      "states": {
+        "loading": "Skeleton cards.",
+        "empty": "No recent news.",
+        "error": "Failed to load feed."
+      },
+      "layout": "Vertical feed of rich cards. The first card is a 'hero' news item with a large image ('news_hero') and gradient scrim. Subsequent items are standard list rows with thumbnail images on the left and titles/dates on the right."
+    },
+    {
+      "name": "AI Study Assistant (KI-Studienassistent)",
+      "purpose": "Interactive chat interface for course help, summarizing notes, or answering campus questions.",
+      "states": {
+        "loading": "Shimmer effect on the chat input or a 'typing...' indicator.",
+        "empty": "Blank chat with 'Suggested Prompts' chips (e.g., 'Summarize my next lecture').",
+        "error": "Message failed to send, display inline retry icon next to the bubble."
+      },
+      "layout": "Conversational UI. User messages have a 'brandPrimary' background, AI messages have a 'surfaceSecondary' background. A sticky input field with glass background at the bottom. KeyboardAvoidingView is mandatory."
+    },
+    {
+      "name": "Profile",
+      "purpose": "User settings, personal information, and app configuration.",
+      "states": {
+        "loading": "Spinner.",
+        "empty": "N/A",
+        "error": "Failed to load user data."
+      },
+      "layout": "Header with an initials avatar (or user photo if available) inside a tinted circle. Below, standard iOS-style settings grouped lists (Account, Preferences, Notifications, Logout) on a 'surface' background."
+    }
+  ],
+  "images": {
+    "login_hero": {
+      "url": "https://images.unsplash.com/photo-1591123120675-6f7f1aae0e5b?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2Njl8MHwxfHNlYXJjaHwzfHx1bml2ZXJzaXR5JTIwY2FtcHVzJTIwYnVpbGRpbmclMjBhcmNoaXRlY3R1cmV8ZW58MHx8fHwxNzkxNDIwMTM3fDA&ixlib=rb-4.1.0&q=85",
+      "alt": "Modern campus building exterior representing HSU"
+    },
+    "news_hero": {
+      "url": "https://images.unsplash.com/photo-1562774053-701939374585?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2Njl8MHwxfHNlYXJjaHwyfHx1bml2ZXJzaXR5JTIwY2FtcHVzJTIwYnVpbGRpbmclMjBhcmNoaXRlY3R1cmV8ZW58MHx8fHwxNzkxNDIwMTM3fDA&ixlib=rb-4.1.0&q=85",
+      "alt": "University building for campus news update"
+    },
+    "assistant_empty": {
+      "url": "https://images.unsplash.com/photo-1514513452089-17f8a9771ee8?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA1MDZ8MHwxfHNlYXJjaHwyfHx1bml2ZXJzaXR5JTIwc3R1ZGVudHMlMjBzdHVkeWluZyUyMGxpYnJhcnl8ZW58MHx8fHwxNzkxNDIwMTM3fDA&ixlib=rb-4.1.0&q=85",
+      "alt": "Students studying in a library"
+    }
+  },
+  "haptics": {
+    "events": {
+      "primary_button_press": "impactLight",
+      "tab_change": "selection",
+      "send_message": "impactMedium",
+      "toggle_switch": "selection",
+      "pull_to_refresh": "impactLight"
+    }
+  },
+  "instructions_to_main_agent": [
+    "Follow the 1 iOS-Native Clean layout principles to provide a structured, accessible experience. No muddy colors.",
+    "Do NOT use any blue, indigo, or purple. Stick strictly to the specified deep crimson (brand) and grayscale surface tokens.",
+    "Implement the 'gradient-to-dark scrim pattern' explicitly on the login_hero image. Layer 1: Image, Layer 2: LinearGradient (transparent -> surfaceInverse), Layer 3: Text/Forms.",
+    "Keep the bottom tabs to a maximum of 4 (Home, Schedule, AI Assistant, Profile). Use the Home screen as a dashboard for navigating to other sub-features like Mensa, Grades, and News.",
+    "In the AI Assistant screen, ensure KeyboardAvoidingView is implemented correctly with a glassmorphism sticky input bar.",
+    "Ensure 'Schedule' uses sticky headers for dates, improving vertical scanning during busy weeks.",
+    "Every icon used must belong to the 'Ionicons' set and be consistent in weight (outline inactive, filled active for tabs).",
+    "Learnings from research: HSU relies on Hanseatic/military formal colors (Red, White, Black). The chosen deep crimson (#9D1B22) honors this. Functional university apps (like Mobbin benchmarks) prioritize a Dashboard (Home) with Quick Links over burying features in a 'hamburger' menu, hence the rich 'Home (Dashboard)' design.",
+    "Include standard Loading, Empty, and Error states for all dynamic screens, especially Grades, Schedule, and Mensa."
+  ]
+}

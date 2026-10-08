@@ -1,0 +1,48 @@
+{
+  "summary": "First end-to-end test run of the HSU Campus App. Backend: 25/25 pytest cases pass (auth register/login/me/patch, schedule CRUD + 6-entry seed + user isolation, grades CRUD + ECTS-weighted average + 1.0-5.0 validation, mensa today/weekday-3-meals/Saturday-empty, news >=5 sorted newest-first, AI SSE streaming with 'OK' prompt, message persistence + clear, 401 enforcement on all protected routes). Frontend web preview: sign-in renders with hero + German labels, register with unique email lands on home tabs, Home dashboard shows user name + Noten/ECTS stat cards (1.92 / 34 for the seeded user) + 4 quick links (quick-grades/mensa/news/settings) all navigating correctly with working back button, Stundenplan tab shows weekday chips with seeded entries and + opens add modal with schedule-save-button, Noten screen groups entries by Trimester with trash delete icons, Mensa and Nachrichten screens open, Settings screen toggles DE/EN language in real time (texts switch to 'Settings'/'Language'/'Save' and back) and settings-save-button present, KI-Assistent tab streams the assistant reply correctly ('OK') when sending 'Antworte nur mit: OK' via the send button, trash/clear icon appears in header only when bubbles exist. Existing credentials from /app/memory/test_credentials.md (kadett@hsu-hh.de / HsuTest1234) login works. Google-login flow was intentionally skipped per instructions — only button render was verified ('Mit Google anmelden' visible). Two web-only issues found around Alert.alert multi-button confirmations (logout + assistant-clear) that silently never resolve on react-native-web; these likely work on native. No deprecated Expo packages (no expo-av/barcode-scanner/background-fetch) detected.",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {"endpoint": "CORSMiddleware (server.py)", "issue": "allow_credentials=True combined with allow_origins=['*'] is semantically invalid per CORS spec. Current app uses Bearer tokens (no cookies) so it does not break anything today, but a browser will reject credentialed requests from any real origin. Consider echoing the request origin or disabling credentials."}
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "profile.tsx logout confirm", "issue": "Alert.alert with multiple buttons does not render on react-native-web, so tapping logout-button never resolves the destructive callback → user stays logged in on web preview. Works on native iOS/Android. Replace with a cross-platform confirm (window.confirm on web + custom Modal, or a lib like react-native-modal) so logout works everywhere.", "testID": "logout-button", "priority": "HIGH"},
+      {"component": "assistant.tsx clear confirm", "issue": "Same Alert.alert multi-button limitation on web: 'Verlauf löschen' trash icon fires an Alert that is not shown on web; the delete callback never runs. Needs the same cross-platform confirm pattern.", "testID": "assistant-clear-button", "priority": "MEDIUM"}
+    ],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "all", "issues": [
+        "Console shows RN-web deprecation warnings: 'shadow* style props are deprecated. Use boxShadow.' and 'props.pointerEvents is deprecated. Use style.pointerEvents.' — these come from older style usage inside the app (e.g. shadowColor/shadowOpacity in StyleSheet, or pointerEvents prop on a View). Non-blocking today but will break in a future RN release; migrate to boxShadow / style.pointerEvents."
+      ]}
+    ],
+    "react_native_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/backend_test.py",
+    "/app/test_reports/pytest/pytest_results.xml"
+  ],
+  "action_items": [
+    "Replace Alert.alert multi-button confirmations in /app/frontend/app/(tabs)/profile.tsx (confirmLogout) and /app/frontend/app/(tabs)/assistant.tsx (clear) with a cross-platform confirm (Platform.OS === 'web' ? window.confirm(...) : Alert.alert(...)) so logout and chat-clear work in the web preview. Native builds already work.",
+    "Migrate deprecated style props: replace shadow* StyleSheet keys with boxShadow and move pointerEvents from prop to style.pointerEvents to silence RN-web console warnings.",
+    "Optional: tighten CORS — avoid combining allow_credentials=True with allow_origins=['*'] in /app/backend/server.py since the app uses Bearer tokens only."
+  ],
+  "critical_code_review_comments": [
+    "server.py CORS: allow_credentials=True + allow_origins=['*'] is a spec violation (safe here only because auth is via Authorization header).",
+    "routes/auth.py register path handles the 409 case both via find_one check and a defensive 'duplicate' string match on exceptions — good. Email is correctly lowercased before storage/lookup.",
+    "routes/academic.py uses user_id scoping in every query/mutation (good isolation) and already excludes Mongo _id via projection.",
+    "routes/ai.py uses emergentintegrations LlmChat with gpt-5.5 as requested; SSE stream contract matches spec ({delta} chunks + final {done:true}). _store writes user message BEFORE the stream yields anything, which is correct for history consistency.",
+    "No file exceeds 700 lines; no obvious DRY violations; all handlers are async; env vars are used (MONGO_URL, DB_NAME, JWT_SECRET, EMERGENT_LLM_KEY)."
+  ],
+  "updated_files": [
+    "/app/backend/tests/backend_test.py (new pytest suite — 25 cases)",
+    "/app/test_reports/pytest/pytest_results.xml (generated)"
+  ],
+  "success_rate": {"backend": "100%", "frontend": "~90% (logout + assistant-clear confirmations do not fire on web preview)"},
+  "seed_data_creation": "No new seed data persisted intentionally — tests create TEST_ prefixed users on the fly (several test_* users remain in MongoDB; harmless). Existing kadett@hsu-hh.de user from /app/memory/test_credentials.md was used for shared read-only auth tests.",
+  "retest_needed": true,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Backend is solid, use /app/backend/tests/backend_test.py as the regression suite. For frontend logout verification on web after fix, the simplest test is: login, go to Profile tab, click logout-button, expect to return to sign-in (login-email-input visible). On web the app currently uses Alert.alert which react-native-web does not render for multi-button confirms. For AI chat testing, use the existing user and the prompt 'Antworte nur mit: OK' — streaming takes 5-10s. The assistant-clear-button only renders when there is at least one message bubble (expected). Google login button renders but cannot be exercised automatically.",
+  "rca_of_issue": "Alert.alert on react-native-web: the official RN-Web implementation of Alert.alert only renders single-button alerts via window.alert; multi-button variants are silently a no-op on web. This is why the destructive 'Abmelden' and 'Verlauf löschen' callbacks never execute in the web preview even though testID clicks succeed. Mitigation: wrap confirmations with Platform.select — on web use window.confirm (synchronous) and call the destructive handler on true; on native keep Alert.alert. Alternatively, build a shared ConfirmDialog Modal component."
+}
