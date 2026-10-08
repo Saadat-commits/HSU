@@ -1,9 +1,7 @@
 import { Redirect } from "expo-router";
 import React from "react";
 
-import { useAuth } from "@/src/auth";
-
+/** Die App startet in der Mitarbeiter-App. Die frühere Campus-App liegt unverändert in app/ und src/. */
 export default function Index() {
-  const { user } = useAuth();
-  return <Redirect href={user ? "/(tabs)" : "/sign-in"} />;
+  return <Redirect href="/mitarbeiter" />;
 }
