@@ -57,7 +57,7 @@ export default function RootLayout() {
           <KeyboardProvider>
             <I18nProvider>
               <AuthProvider>
-                <StatusBar style="dark" />
+                <StatusBar style="auto" />
                 <Navigator />
               </AuthProvider>
             </I18nProvider>

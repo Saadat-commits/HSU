@@ -35,8 +35,9 @@ const useStyles = makeStyles((colors) => ({
     padding: spacing.lg,
     gap: spacing.sm,
   },
+  // Sits on a dark image scrim in both themes.
   heroTitle: {
-    color: colors.onSurfaceInverse,
+    color: "#FFFFFF",
     fontSize: 20,
     fontWeight: "800",
   },

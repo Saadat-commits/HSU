@@ -100,9 +100,50 @@ export const fontSize = {
 
 export type ThemeColors = typeof light;
 
+const dark: ThemeColors = {
+  // Surfaces
+  surface: "#000000",
+  onSurface: "#FFFFFF",
+  surfaceSecondary: "#1C1C1E",
+  onSurfaceSecondary: "#F2F2F7",
+  surfaceTertiary: "#2C2C2E",
+  onSurfaceTertiary: "#D1D1D6",
+  surfaceInverse: "#F2F2F7",
+  onSurfaceInverse: "#1C1C1E",
+  muted: "#8E8E93",
+
+  // Brand — HSU crimson, lifted for contrast on dark surfaces
+  brand: "#D43B43",
+  onBrand: "#FFFFFF",
+  brandPrimary: "#C62A32",
+  onBrandPrimary: "#FFFFFF",
+  brandSecondary: "#5A1216",
+  onBrandSecondary: "#F5D6D8",
+  brandTertiary: "#3A1013",
+  onBrandTertiary: "#F0A7AC",
+
+  // Status
+  success: "#30D158",
+  onSuccess: "#000000",
+  warning: "#FFD60A",
+  onWarning: "#000000",
+  error: "#FF453A",
+  onError: "#000000",
+  info: "#0A84FF",
+  onInfo: "#FFFFFF",
+
+  // Lines
+  border: "#38383A",
+  borderStrong: "#48484A",
+  divider: "#2C2C2E",
+};
+
 export const defaultScheme = "light" satisfies ColorScheme;
 
-export const themes: { light: ThemeColors; dark?: ThemeColors } = { light };
+export const themes: { light: ThemeColors; dark?: ThemeColors } = {
+  light,
+  dark,
+};
 
 // In-app theme toggle, only after `dark` exists in `themes`. Call
 // setColorScheme("dark"), setColorScheme("light"), or setColorScheme(null) to

@@ -18,6 +18,7 @@ Bundeswehr Hamburg (Expo + FastAPI + MongoDB).
 - Mensa: Wochentagsauswahl, Gerichte mit Preisen (Stud./Bedienstete) und Tags
 - Campus-News: Hero-Artikel + Liste, Detailansicht im Modal
 - KI-Studienassistent: Streaming-Chat (SSE), Verlauf in MongoDB, Vorschlags-Chips
+- Dunkelmodus (automatisch nach Systemeinstellung, `src/theme.ts` `dark`-Palette)
 - Profil & Einstellungen: Sprache, Name, Studiengang, Abmelden
 
 ## Architektur
@@ -48,6 +49,5 @@ HSU-Crimson `#9D1B22`, iOS-Native-Clean, Ionicons, 4 Bottom-Tabs
 (siehe `/app/design_guidelines.json`).
 
 ## Offen / Backlog
-- Dark Mode
 - Push-Benachrichtigungen (nur auf Wunsch)
 - Echte HSU-Datenquellen (Stundenplan/Mensa-Schnittstellen)

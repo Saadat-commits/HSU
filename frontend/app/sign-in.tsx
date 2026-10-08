@@ -46,12 +46,13 @@ const useStyles = makeStyles((colors) => ({
     fontSize: 12,
     letterSpacing: 0.6,
   },
+  // The hero scrim stays dark in both themes, so this text is always white.
   heroTitle: {
-    color: colors.onSurfaceInverse,
+    color: "#FFFFFF",
     fontSize: 28,
     fontWeight: "800",
   },
-  heroSubtitle: { color: colors.onSurfaceInverse, fontSize: 14, opacity: 0.9 },
+  heroSubtitle: { color: "#FFFFFF", fontSize: 14, opacity: 0.9 },
   form: {
     padding: spacing.xl,
     gap: spacing.lg,
@@ -132,7 +133,7 @@ export default function SignIn() {
             transition={300}
           />
           <LinearGradient
-            colors={["transparent", "rgba(28,28,30,0.35)", colors.surfaceInverse]}
+            colors={["transparent", "rgba(0,0,0,0.4)", "rgba(0,0,0,0.92)"]}
             style={styles.heroGradient}
           />
           <View style={[styles.heroContent, { paddingTop: insets.top }]}>
